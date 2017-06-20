@@ -1,0 +1,22 @@
+{
+  "name": "abyss-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Flamov@github.com/Flamov/abyss-generator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Flamov/abyss-generator/issues"
+  },
+  "homepage": "https://github.com/Flamov/abyss-generator#readme",
+  "devDependencies": {
+    "three": "^0.85.2"
+  }
+}
