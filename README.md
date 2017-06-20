@@ -1,8 +1,18 @@
-# abyss-generator
+# Abyss Generator
+
+A WebGL/[three.js](https://www.threejs.org/) topographical generator inspired by Duffy London's [*Abyss Table*](https://www.duffylondon.com/product/tables/abyss-table/).
 
 **Demo:** https://www.codepen.io/Flamov/pen/MoaVRM/
 
-**Static contour generation from:** http://contourmapcreator.urgr8.ch/
+## Roadmap
+
+- [x] Add basic layers with depth and colour
+- [ ] Add basic camera controls
+- [ ] Add random contour generation
+
+## Details
+
+Static contour generation from: http://contourmapcreator.urgr8.ch/
 
 References:
 * http://bl.ocks.org/herrstucki/6312708
