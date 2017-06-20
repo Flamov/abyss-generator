@@ -1,16 +1,16 @@
 // From darkest to lightest
 var colours = [
-	'#02071C',
-	'#010824',
-	'#011E41',
-	'#042846',
-	'#02294B',
+	// '#02071C',
+	// '#010824',
+	// '#011E41',
+	// '#042846',
+	// '#02294B',
 	'#073553',
-	'#06374D',
+	// '#06374D',
 	'#094C5F',
-	'#064C5C',
+	// '#064C5C',
 	'#064B51',
-	'#085152',
+	// '#085152',
 	'#1B6D6B',
 	'#456A58',
 	'#7C8B7B'
@@ -33,15 +33,10 @@ function setupScene() {
 }
 
 function addCamera() {
-
 	camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 10000);
-
-	camera.position.x = 0;
-	camera.position.y = 0;
-	camera.position.z = 1000;
-
-	// camera.rotation.x = 90 * Math.PI;
-
+	camera.position.x = 100 / 2;
+	camera.position.y = 100 / 2;
+	camera.position.z = 600;
 }
 
 var group;
@@ -53,78 +48,82 @@ function addLayers() {
 
 	group = new THREE.Group();
 
-	var layerDepth = 10;
+	var layerSizes = {
+		depth: 10,
+		size: 100
+	};
 
 	var extrudeSettings = {
-		amount: layerDepth,
+		amount: layerSizes.depth,
 		bevelEnabled: false
 	};
 
-	/* loader.load(
-		// 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/617753/paper%20texture.png',
-		// 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/617753/stone.gif',
-		// 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/617753/paper_2.png',
-		// 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/617753/paper_3.png',
-		'https://s3-us-west-2.amazonaws.com/s.cdpn.io/617753/paper_4.png',
-		function(texture) {
+	var svgElement = document.getElementsByTagName('svg')[0];
+	var svgPaths = document.getElementsByTagName('path');
 
-			texture.wrapS = THREE.RepeatWrapping;
-			texture.wrapT = THREE.RepeatWrapping;
-			texture.repeat.set(0.05, 0.05); */
+	var returnLayer = function(depth, material) {
 
-			var svgElement = document.getElementsByTagName('svg')[0];
-			var svgPaths = document.getElementsByTagName('path');
+		try {
 
-			for (var i = 0; i < svgPaths.length; i++) {
+			var offsetX = svgElement.getAttribute('width') / 2;
+			var offsetY = svgElement.getAttribute('height') / 2;
 
-				try {
+			// Construct the main shape
+			var shape = new THREE.Shape();
+			shape.absarc(offsetX, offsetY, layerSizes.size, 0, Math.PI * 2, false);
 
-					var path = $d3g.transformSVGPath(svgPaths[i].getAttribute('d')).currentPath;
+			// Try loading the path, otherwise return an error
+			var path = $d3g.transformSVGPath(svgPaths[depth].getAttribute('d')).currentPath;
 
-					var circle = new THREE.Shape();
-					circle.absarc(0, 0, 200, 0, Math.PI * 2, false);
+			// Add the SVG path to the shape holes array
+			shape.holes.push(path);
 
-					circle.holes.push(path);
+			// Construct the layer geometry from the shape and an extrude
+			var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-					var geometry = new THREE.ExtrudeGeometry(circle, extrudeSettings);
+			// Construct the mesh and adjust its z-position based on loop index
+			var mesh = new THREE.Mesh(geometry, material);
+			mesh.position.z = depth * layerSizes.depth;
 
-					var material = new THREE.MeshBasicMaterial({
-						// map: texture,
-						overdraw: 10,
-						color: new THREE.Color(colours[i])
-						// color: new THREE.Color('red')
-					});
+			return mesh;
 
-					var mesh = new THREE.Mesh(geometry, material);
-					mesh.position.z = i * layerDepth;
+		}
+		catch(error) {
 
-					group.add(mesh);
+			console.error(error);
+			console.error(svgPaths[depth]);
 
-				}
-				catch(error) {
+			return null;
 
-					console.log(error);
+		}
 
-				}
+	};
 
+	loader.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/617753/paper_4.png', function(texture) {
+
+		var repeat = 0.01;
+
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.wrapT = THREE.RepeatWrapping;
+		texture.repeat.set(repeat, repeat);
+
+		for (var i = 0; i < svgPaths.length; i++) {
+
+			var material = new THREE.MeshBasicMaterial({
+				map: texture,
+				overdraw: 10,
+				color: new THREE.Color(colours[i])
+			});
+
+			var layer = returnLayer(i, material);
+
+			if (layer !== null) {
+				group.add(layer);
 			}
 
-			var circle = new THREE.Shape();
-			circle.absarc(0, 0, 200, 0, Math.PI * 2, false);
-			var geometry = new THREE.ShapeBufferGeometry(circle);
-			var mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
-			mesh.position.z = 0;
-			group.add(mesh);
+		}
 
-			// group.position.x = -250;
-			// group.position.y = -250;
-
-		/* }
-
-	); */
-
-	// group.position.y = -80;
-	// group.rotation.x = -0.4;
+	});
 
 	scene.add(group);
 
@@ -134,7 +133,6 @@ function animate() {
 
 	requestAnimationFrame(animate);
 
-	// group.rotation.x += 0.001;
 	group.rotation.y += 0.01;
 
 	renderer.render(scene, camera);
